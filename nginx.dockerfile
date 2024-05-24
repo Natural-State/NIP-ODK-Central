@@ -8,8 +8,8 @@ RUN apt-get update \
 COPY ./ ./
 RUN files/prebuild/write-version.sh
 ARG OIDC_ENABLED
-RUN OIDC_ENABLED="$OIDC_ENABLED" files/prebuild/build-frontend.sh
-
+# RUN OIDC_ENABLED="$OIDC_ENABLED" files/prebuild/build-frontend.sh
+RUN OIDC_ENABLED="false" files/prebuild/build-frontend.sh
 
 
 # when upgrading, look for upstream changes to redirector.conf
