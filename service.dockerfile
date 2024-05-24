@@ -55,13 +55,14 @@ RUN apt-get update \
         netcat-traditional \
     && rm -rf /var/lib/apt/lists/*
 
+COPY server/ ./
+
 RUN --mount=type=bind,target=./package.json,src=./server/package.json \
     --mount=type=bind,target=./package-lock.json,src=./server/package-lock.json \
     npm clean-install --omit=dev --legacy-peer-deps --no-audit --fund=false --update-notifier=false
 
 # RUN npm clean-install --omit=dev --legacy-peer-deps --no-audit --fund=false --update-notifier=false
 
-COPY server/ ./
 COPY files/service/scripts/ ./
 
 COPY files/service/config.json.template /usr/share/odk/
