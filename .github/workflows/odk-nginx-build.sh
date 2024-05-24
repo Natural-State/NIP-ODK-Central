@@ -6,7 +6,7 @@ usage() {
     echo "Usage: $0 [OPTIONS]"
     echo "Options:"
     echo "  -p, --DOCKERFILE_PATH"
-    echo "  -r, --ODK_SERVICE_REPOSITORY"
+    echo "  -r, --ODK_NGINX_REPOSITORY"
     echo "  -u, --DOCKERHUB_USER"
     echo "  -t, --DOCKERHUB_TOKEN"
     echo "  -T, --TAG"
@@ -16,7 +16,7 @@ usage() {
 }
 
 DOCKERFILE_PATH="../.."
-ODK_SERVICE_REPOSITORY=""
+ODK_NGINX_REPOSITORY=""
 DOCKERHUB_USER=""
 DOCKERHUB_TOKEN=""
 TAG="latest"
@@ -32,7 +32,7 @@ while [[ $# -gt 0 ]]; do
         shift 2
         ;;
     -r)
-        ODK_SERVICE_REPOSITORY="$2"
+        ODK_NGINX_REPOSITORY="$2"
         shift 2
         ;;
     -u)
@@ -62,7 +62,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Check if required arguments are provided
-if [ -z "$DOCKERFILE_PATH" ] || [ -z "$ODK_SERVICE_REPOSITORY" ] || [ -z "$DOCKERHUB_USER" ]; then
+if [ -z "$DOCKERFILE_PATH" ] || [ -z "$ODK_NGINX_REPOSITORY" ] || [ -z "$DOCKERHUB_USER" ]; then
     echo "Error: Missing required arguments."
     usage
 fi
@@ -75,7 +75,7 @@ echo "Tag is: $TAG"
 
 docker build \
   -f nginx.dockerfile \
-  -t "${ODK_SERVICE_REPOSITORY}:${TAG}" \
+  -t "${ODK_NGINX_REPOSITORY}:${TAG}" \
   --build-arg OIDC_ENABLED=$OIDC_ENABLED \
   --target $DOCKER_BUILD_TARGET \
   .
@@ -87,5 +87,5 @@ else
     # Login and push
     docker logout
     docker login --username "${DOCKERHUB_USER}" --password "${DOCKERHUB_TOKEN}"
-    docker push "${ODK_SERVICE_REPOSITORY}:${TAG}"
+    docker push "${ODK_NGINX_REPOSITORY}:${TAG}"
 fi
