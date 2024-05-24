@@ -29,6 +29,7 @@ env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   DOCKER_BUILD_TARGET: "${{ github.event.inputs.docker_target }}"
   TAG: "${{ github.event.inputs.docker_tag }}"
+  OIDC_ENABLED: "${{ secrets.OIDC_ENABLED }}"
 
 jobs:
   deployment:
@@ -45,4 +46,4 @@ jobs:
           TAG=$([[ -z "${{env.TAG}}" ]] && echo "${{env.BRANCH_NAME}}" || echo "${{env.BRANCH_NAME}}-${{env.TAG}}" )
           echo "Tag: $TAG"
           chmod +x .github/workflows/odk-nginx-build.sh
-          .github/workflows/odk-nginx-build.sh -r "$ODK_SERVICE_REPOSITORY" -u "$DOCKERHUB_USER" -t "$DOCKERHUB_TOKEN" -T "$TAG" -p "$DOCKERFILE_PATH" -D "$DOCKER_BUILD_TARGET"
+          .github/workflows/odk-nginx-build.sh -r "$ODK_SERVICE_REPOSITORY" -u "$DOCKERHUB_USER" -t "$DOCKERHUB_TOKEN" -T "$TAG" -p "$DOCKERFILE_PATH" -D "$DOCKER_BUILD_TARGET" -E "$OIDC_ENABLED"
