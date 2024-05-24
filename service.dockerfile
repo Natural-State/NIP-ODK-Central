@@ -39,11 +39,12 @@ LABEL org.opencontainers.image.source="https://github.com/getodk/central"
 
 WORKDIR /usr/odk
 
-COPY server/package*.json ./
+COPY package*.json ./
 COPY --from=pgdg /etc/apt/sources.list.d/pgdg.list \
     /etc/apt/sources.list.d/pgdg.list
 COPY --from=pgdg /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg \
     /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg
+
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         gpg \
@@ -53,12 +54,11 @@ RUN apt-get update \
         procps \
         postgresql-client-14 \
         netcat-traditional \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && npm clean-install --omit=dev --legacy-peer-deps --no-audit \
+        --fund=false --update-notifier=false
 
 COPY server/ ./
-
-RUN npm clean-install --omit=dev --legacy-peer-deps --no-audit --fund=false --update-notifier=false
-
 COPY files/service/scripts/ ./
 
 COPY files/service/config.json.template /usr/share/odk/
