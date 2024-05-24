@@ -1,4 +1,4 @@
-name: "ODK Service Push"
+name: "ODK Enketo Push"
 on:
   workflow_dispatch:
     inputs:
