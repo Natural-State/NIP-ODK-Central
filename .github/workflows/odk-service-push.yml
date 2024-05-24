@@ -11,6 +11,15 @@ on:
         description: "Image TAG (branch name will be included automatically)"
         type: text
         required: false
+      docker_target:
+        description: "Target Image"
+        type: choice
+        options:
+          - pgdg
+          - intermediate
+          - slim
+        default: slim
+        required: true
 
 env:
   DOCKERHUB_TOKEN: "${{secrets.DOCKERHUB_TOKEN}}"
@@ -18,6 +27,7 @@ env:
   ODK_SERVICE_REPOSITORY: "${{vars.ODK_SERVICE_REPOSITORY}}"
   DOCKERFILE_PATH: "."
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+  DOCKER_BUILD_TARGET: "${{ github.event.inputs.docker_target }}"
   TAG: "${{ github.event.inputs.docker_tag }}"
 
 jobs:
@@ -35,4 +45,4 @@ jobs:
           TAG=$([[ -z "${{env.TAG}}" ]] && echo "${{env.BRANCH_NAME}}" || echo "${{env.BRANCH_NAME}}-${{env.TAG}}" )
           echo "Tag: $TAG"
           chmod +x .github/workflows/odk-service-build.sh
-          .github/workflows/odk-service-build.sh -r "$ODK_SERVICE_REPOSITORY" -u "$DOCKERHUB_USER" -t "$DOCKERHUB_TOKEN" -T "$TAG" -p "$DOCKERFILE_PATH"
+          .github/workflows/odk-service-build.sh -r "$ODK_SERVICE_REPOSITORY" -u "$DOCKERHUB_USER" -t "$DOCKERHUB_TOKEN" -T "$TAG" -p "$DOCKERFILE_PATH" -D "$DOCKER_BUILD_TARGET"
