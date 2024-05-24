@@ -53,9 +53,13 @@ RUN apt-get update \
         procps \
         postgresql-client-14 \
         netcat-traditional \
-    && rm -rf /var/lib/apt/lists/* \
-    && npm clean-install --omit=dev --legacy-peer-deps --no-audit \
-        --fund=false --update-notifier=false
+    && rm -rf /var/lib/apt/lists/*
+
+RUN --mount=type=bind,target=./package.json,src=./server/package.json \
+    --mount=type=bind,target=./package-lock.json,src=./server/package-lock.json \
+    npm clean-install --omit=dev --legacy-peer-deps --no-audit --fund=false --update-notifier=false
+
+# RUN npm clean-install --omit=dev --legacy-peer-deps --no-audit --fund=false --update-notifier=false
 
 COPY server/ ./
 COPY files/service/scripts/ ./
