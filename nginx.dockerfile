@@ -6,10 +6,18 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY ./ ./
+
+COPY files/prebuild/write-version.sh /files/prebuild/write-version.sh
+COPY files/prebuild/build-frontend.sh /files/prebuild/build-frontend.sh
+
+# Make files executable
+RUN chmod +x files/prebuild/write-version.sh
+RUN chmod +x files/prebuild/build-frontend.sh
+
 RUN files/prebuild/write-version.sh
+
 ARG OIDC_ENABLED
 RUN OIDC_ENABLED="$OIDC_ENABLED" files/prebuild/build-frontend.sh
-
 
 
 # when upgrading, look for upstream changes to redirector.conf

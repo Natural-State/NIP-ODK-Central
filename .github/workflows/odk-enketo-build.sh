@@ -11,7 +11,6 @@ usage() {
     echo "  -t, --DOCKERHUB_TOKEN"
     echo "  -T, --TAG"
     echo "  -D, --DOCKER_BUILD_TARGET"
-    echo "  -D, --OIDC_ENABLED"
     exit 1
 }
 
@@ -20,8 +19,7 @@ ODK_SERVICE_REPOSITORY=""
 DOCKERHUB_USER=""
 DOCKERHUB_TOKEN=""
 TAG="latest"
-DOCKER_BUILD_TARGET="intermediate"
-OIDC_ENABLED="false"
+DOCKER_BUILD_TARGET="slim"
 
 # Check args
 while [[ $# -gt 0 ]]; do
@@ -51,10 +49,6 @@ while [[ $# -gt 0 ]]; do
         DOCKER_BUILD_TARGET="$2"
         shift 2
         ;;
-    -E)
-        OIDC_ENABLED="$2"
-        shift 2
-        ;;
     *)
         usage
         ;;
@@ -72,11 +66,9 @@ cd $DOCKERFILE_PATH
 
 echo "Build target is: $DOCKER_BUILD_TARGET"
 echo "Tag is: $TAG"
-
 docker build \
-  -f nginx.dockerfile \
+  -f enketo.dockerfile \
   -t "${ODK_SERVICE_REPOSITORY}:${TAG}" \
-  --build-arg OIDC_ENABLED=$OIDC_ENABLED \
   --target $DOCKER_BUILD_TARGET \
   .
 
