@@ -19,7 +19,7 @@ ODK_SERVICE_REPOSITORY=""
 DOCKERHUB_USER=""
 DOCKERHUB_TOKEN=""
 TAG="latest"
-DOCKER_BUILD_TARGET="slim"
+DOCKER_BUILD_TARGET="intermediate"
 
 # Check args
 while [[ $# -gt 0 ]]; do
@@ -67,7 +67,7 @@ cd $DOCKERFILE_PATH
 echo "Build target is: $DOCKER_BUILD_TARGET"
 echo "Tag is: $TAG"
 docker build \
-  -f service.dockerfile \
+  -f nginx.dockerfile \
   -t "${ODK_SERVICE_REPOSITORY}:${TAG}" \
   --target $DOCKER_BUILD_TARGET \
   .

@@ -1,6 +1,6 @@
 ARG node_version=20.12.2
 
-
+#############################################
 
 FROM node:${node_version}-slim as pgdg
 RUN apt-get update \
@@ -15,7 +15,7 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(grep -oP 'VERSION_CODEN
     && curl https://www.postgresql.org/media/keys/ACCC4CF8.asc \
       | gpg --dearmor > /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg
 
-
+#############################################
 
 FROM node:${node_version}-slim as intermediate
 RUN apt-get update \
@@ -24,26 +24,27 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 COPY . .
 RUN mkdir /tmp/sentry-versions
-RUN git describe --tags --dirty > /tmp/sentry-versions/central
-WORKDIR /server
-RUN git describe --tags --dirty > /tmp/sentry-versions/server
-WORKDIR /client
-RUN git describe --tags --dirty > /tmp/sentry-versions/client
+# RUN git describe --tags --dirty > /tmp/sentry-versions/central
+# WORKDIR /server
+# RUN git describe --tags --dirty > /tmp/sentry-versions/server
+# WORKDIR /client
+# RUN git describe --tags --dirty > /tmp/sentry-versions/client
 
+#############################################
 
-
-FROM node:${node_version}-slim
+FROM node:${node_version}-slim as slim
 
 ARG node_version
 LABEL org.opencontainers.image.source="https://github.com/getodk/central"
 
 WORKDIR /usr/odk
 
-COPY server/package*.json ./
+COPY package*.json ./
 COPY --from=pgdg /etc/apt/sources.list.d/pgdg.list \
     /etc/apt/sources.list.d/pgdg.list
 COPY --from=pgdg /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg \
     /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg
+
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         gpg \
