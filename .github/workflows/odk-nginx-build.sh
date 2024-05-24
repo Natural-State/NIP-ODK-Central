@@ -11,6 +11,7 @@ usage() {
     echo "  -t, --DOCKERHUB_TOKEN"
     echo "  -T, --TAG"
     echo "  -D, --DOCKER_BUILD_TARGET"
+    echo "  -D, --OIDC_ENABLED"
     exit 1
 }
 
@@ -20,6 +21,7 @@ DOCKERHUB_USER=""
 DOCKERHUB_TOKEN=""
 TAG="latest"
 DOCKER_BUILD_TARGET="intermediate"
+OIDC_ENABLED="false"
 
 # Check args
 while [[ $# -gt 0 ]]; do
@@ -47,6 +49,10 @@ while [[ $# -gt 0 ]]; do
         ;;
     -D)
         DOCKER_BUILD_TARGET="$2"
+        shift 2
+        ;;
+    -E)
+        OIDC_ENABLED="$2"
         shift 2
         ;;
     *)
