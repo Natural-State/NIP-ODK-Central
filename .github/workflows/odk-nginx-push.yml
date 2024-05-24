@@ -41,6 +41,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Fetch submodule
+        run: git submodule update --init --recursive
       - name: Build & Push Image
         run: |
           TAG=$([[ -z "${{env.TAG}}" ]] && echo "${{env.BRANCH_NAME}}" || echo "${{env.BRANCH_NAME}}-${{env.TAG}}" )
