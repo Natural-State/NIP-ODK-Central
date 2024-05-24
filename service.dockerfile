@@ -23,13 +23,18 @@ RUN apt-get update \
         git \
     && rm -rf /var/lib/apt/lists/*
 COPY . .
+# RUN mkdir /tmp/sentry-versions
+# RUN git describe --tags --dirty > /tmp/sentry-versions/central
+# WORKDIR /server
+# RUN git describe --tags --dirty > /tmp/sentry-versions/server
+# WORKDIR /client
+# RUN git describe --tags --dirty > /tmp/sentry-versions/client
 RUN mkdir /tmp/sentry-versions
-RUN git describe --tags --dirty > /tmp/sentry-versions/central
+RUN if [ -d ".git" ]; then git describe --tags --dirty > /tmp/sentry-versions/central; else git clone https://github.com/Natural-State/NIP-ODK-Central.git && git describe --tags --dirty > /tmp/sentry-versions/central; fi
 WORKDIR /server
-RUN git describe --tags --dirty > /tmp/sentry-versions/server
+RUN if [ -d ".git" ]; then git describe --tags --dirty > /tmp/sentry-versions/server; else git clone https://github.com/Natural-State/NIP-ODK-Central.git && git describe --tags --dirty > /tmp/sentry-versions/server; fi
 WORKDIR /client
-RUN git describe --tags --dirty > /tmp/sentry-versions/client
-
+RUN if [ -d ".git" ]; then git describe --tags --dirty > /tmp/sentry-versions/client; else git clone https://github.com/Natural-State/NIP-ODK-Central.git && git describe --tags --dirty > /tmp/sentry-versions/client; fi
 
 
 FROM node:${node_version}-slim
