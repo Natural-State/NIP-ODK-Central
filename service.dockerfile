@@ -1,6 +1,6 @@
 ARG node_version=20.12.2
 
-
+#############################################
 
 FROM node:${node_version}-slim as pgdg
 RUN apt-get update \
@@ -15,7 +15,7 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(grep -oP 'VERSION_CODEN
     && curl https://www.postgresql.org/media/keys/ACCC4CF8.asc \
       | gpg --dearmor > /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg
 
-
+#############################################
 
 FROM node:${node_version}-slim as intermediate
 RUN apt-get update \
@@ -23,21 +23,16 @@ RUN apt-get update \
         git \
     && rm -rf /var/lib/apt/lists/*
 COPY . .
-# RUN mkdir /tmp/sentry-versions
-# RUN git describe --tags --dirty > /tmp/sentry-versions/central
-# WORKDIR /server
-# RUN git describe --tags --dirty > /tmp/sentry-versions/server
-# WORKDIR /client
-# RUN git describe --tags --dirty > /tmp/sentry-versions/client
 RUN mkdir /tmp/sentry-versions
-RUN if [ -d ".git" ]; then git describe --tags --dirty > /tmp/sentry-versions/central; else git clone https://github.com/Natural-State/NIP-ODK-Central.git && git describe --tags --dirty > /tmp/sentry-versions/central; fi
+RUN git describe --tags --dirty > /tmp/sentry-versions/central
 WORKDIR /server
-RUN if [ -d ".git" ]; then git describe --tags --dirty > /tmp/sentry-versions/server; else git clone https://github.com/Natural-State/NIP-ODK-Central.git && git describe --tags --dirty > /tmp/sentry-versions/server; fi
+RUN git describe --tags --dirty > /tmp/sentry-versions/server
 WORKDIR /client
-RUN if [ -d ".git" ]; then git describe --tags --dirty > /tmp/sentry-versions/client; else git clone https://github.com/Natural-State/NIP-ODK-Central.git && git describe --tags --dirty > /tmp/sentry-versions/client; fi
+RUN git describe --tags --dirty > /tmp/sentry-versions/client
 
+#############################################
 
-FROM node:${node_version}-slim
+FROM node:${node_version}-slim as slim
 
 ARG node_version
 LABEL org.opencontainers.image.source="https://github.com/getodk/central"

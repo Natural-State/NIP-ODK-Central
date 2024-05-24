@@ -10,6 +10,7 @@ usage() {
     echo "  -u, --DOCKERHUB_USER"
     echo "  -t, --DOCKERHUB_TOKEN"
     echo "  -T, --TAG"
+    echo "  -D, --DOCKER_BUILD_TARGET"
     exit 1
 }
 
@@ -18,6 +19,7 @@ ODK_SERVICE_REPOSITORY=""
 DOCKERHUB_USER=""
 DOCKERHUB_TOKEN=""
 TAG="latest"
+DOCKER_BUILD_TARGET="slim"
 
 # Check args
 while [[ $# -gt 0 ]]; do
@@ -43,6 +45,10 @@ while [[ $# -gt 0 ]]; do
         TAG="$2"
         shift 2
         ;;
+    -D)
+        DOCKER_BUILD_TARGET="$2"
+        shift 2
+        ;;
     *)
         usage
         ;;
@@ -58,10 +64,12 @@ fi
 echo "Docker file path is ${DOCKERFILE_PATH}"
 cd $DOCKERFILE_PATH
 
+echo "Build target is: $DOCKER_BUILD_TARGET"
 echo "Tag is: $TAG"
 docker build \
   -f service.dockerfile \
   -t "${ODK_SERVICE_REPOSITORY}:${TAG}" \
+  --target $DOCKER_BUILD_TARGET \
   .
 
 if [[ -z "${DOCKERHUB_TOKEN}" ]]; then
