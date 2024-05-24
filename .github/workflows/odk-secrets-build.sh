@@ -6,7 +6,7 @@ usage() {
     echo "Usage: $0 [OPTIONS]"
     echo "Options:"
     echo "  -p, --DOCKERFILE_PATH"
-    echo "  -r, --ODK_ENKETO_REPOSITORY"
+    echo "  -r, --ODK_SECRETS_REPOSITORY"
     echo "  -u, --DOCKERHUB_USER"
     echo "  -t, --DOCKERHUB_TOKEN"
     echo "  -T, --TAG"
@@ -15,7 +15,7 @@ usage() {
 }
 
 DOCKERFILE_PATH="../.."
-ODK_ENKETO_REPOSITORY=""
+ODK_SECRETS_REPOSITORY=""
 DOCKERHUB_USER=""
 DOCKERHUB_TOKEN=""
 TAG="latest"
@@ -30,7 +30,7 @@ while [[ $# -gt 0 ]]; do
         shift 2
         ;;
     -r)
-        ODK_ENKETO_REPOSITORY="$2"
+        ODK_SECRETS_REPOSITORY="$2"
         shift 2
         ;;
     -u)
@@ -56,7 +56,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Check if required arguments are provided
-if [ -z "$DOCKERFILE_PATH" ] || [ -z "$ODK_ENKETO_REPOSITORY" ] || [ -z "$DOCKERHUB_USER" ]; then
+if [ -z "$DOCKERFILE_PATH" ] || [ -z "$ODK_SECRETS_REPOSITORY" ] || [ -z "$DOCKERHUB_USER" ]; then
     echo "Error: Missing required arguments."
     usage
 fi
@@ -67,8 +67,8 @@ cd $DOCKERFILE_PATH
 echo "Build target is: $DOCKER_BUILD_TARGET"
 echo "Tag is: $TAG"
 docker build \
-  -f enketo.dockerfile \
-  -t "${ODK_ENKETO_REPOSITORY}:${TAG}" \
+  -f secrets.dockerfile \
+  -t "${ODK_SECRETS_REPOSITORY}:${TAG}" \
   --target $DOCKER_BUILD_TARGET \
   .
 
@@ -79,5 +79,5 @@ else
     # Login and push
     docker logout
     docker login --username "${DOCKERHUB_USER}" --password "${DOCKERHUB_TOKEN}"
-    docker push "${ODK_ENKETO_REPOSITORY}:${TAG}"
+    docker push "${ODK_SECRETS_REPOSITORY}:${TAG}"
 fi
