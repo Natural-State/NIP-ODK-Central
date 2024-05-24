@@ -72,9 +72,11 @@ cd $DOCKERFILE_PATH
 
 echo "Build target is: $DOCKER_BUILD_TARGET"
 echo "Tag is: $TAG"
+
 docker build \
   -f nginx.dockerfile \
   -t "${ODK_SERVICE_REPOSITORY}:${TAG}" \
+  --build-arg OIDC_ENABLED=$OIDC_ENABLED \
   --target $DOCKER_BUILD_TARGET \
   .
 
