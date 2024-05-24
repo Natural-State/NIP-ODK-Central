@@ -24,7 +24,7 @@ on:
 env:
   DOCKERHUB_TOKEN: "${{secrets.DOCKERHUB_TOKEN}}"
   DOCKERHUB_USER: "${{secrets.DOCKERHUB_USER}}"
-  ODK_SERVICE_REPOSITORY: "${{vars.ODK_SERVICE_REPOSITORY}}"
+  ODK_NGINX_REPOSITORY: "${{vars.ODK_NGINX_REPOSITORY}}"
   DOCKERFILE_PATH: "."
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   DOCKER_BUILD_TARGET: "${{ github.event.inputs.docker_target }}"
@@ -46,4 +46,4 @@ jobs:
           TAG=$([[ -z "${{env.TAG}}" ]] && echo "${{env.BRANCH_NAME}}" || echo "${{env.BRANCH_NAME}}-${{env.TAG}}" )
           echo "Tag: $TAG"
           chmod +x .github/workflows/odk-nginx-build.sh
-          .github/workflows/odk-nginx-build.sh -r "$ODK_SERVICE_REPOSITORY" -u "$DOCKERHUB_USER" -t "$DOCKERHUB_TOKEN" -T "$TAG" -p "$DOCKERFILE_PATH" -D "$DOCKER_BUILD_TARGET" -E "$OIDC_ENABLED"
+          .github/workflows/odk-nginx-build.sh -r "$ODK_NGINX_REPOSITORY" -u "$DOCKERHUB_USER" -t "$DOCKERHUB_TOKEN" -T "$TAG" -p "$DOCKERFILE_PATH" -D "$DOCKER_BUILD_TARGET" -E "$OIDC_ENABLED"
