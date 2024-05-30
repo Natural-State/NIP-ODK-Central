@@ -4,8 +4,7 @@
       "host": "${DB_HOST}",
       "user": "${DB_USER}",
       "password": "${DB_PASSWORD}",
-      "database": "${DB_NAME}",
-      "ssl": ${DB_SSL}
+      "database": "${DB_NAME}"
     },
     "email": {
       "serviceAccount": "${EMAIL_FROM}",
