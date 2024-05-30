@@ -69,10 +69,11 @@ helm upgrade \
     --set externalDatabase.host="${DB_HOST}" \
     --set externalDatabase.user="${DB_USER}" \
     --set externalDatabase.password="${DB_PASSWORD}" \
-    --set externalDatabase.name="${DB_NAME}"
+    --set externalDatabase.name="${DB_NAME}" \
+    --set externalDatabase.ssl="${DB_SSL}"
     
 
-    # --set externalDatabase.ssl="${DB_SSL}"
+    # 
     # --set app.container.env.dbSSL="${DB_SSL}" \
     # --wait \
     # --timeout 300s

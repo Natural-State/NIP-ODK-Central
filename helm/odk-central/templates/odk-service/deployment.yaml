@@ -75,8 +75,8 @@ spec:
               value: {{ .Values.externalDatabase.password | quote }}
             - name: DB_NAME
               value: {{ .Values.externalDatabase.name | quote }}
-            # - name: DB_SSL
-            #   value: {{ .Values.externalDatabase.ssl | quote }}
+            - name: DB_SSL
+              value: {{ .Values.externalDatabase.ssl | quote }}
 
           volumeMounts:
           - name: enketo-api-key
