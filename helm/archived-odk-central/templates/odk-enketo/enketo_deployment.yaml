@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enketo
+  labels:
+    odk.service: enketo
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+        odk.service: enketo
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        odk.service: enketo
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: copy-config-file
+          image: busybox
+          command: ['sh', '-c', 'cp /config/* /srv/src/enketo_express/config']
+          volumeMounts:
+            - name: {{ .Values.enketo.configSecretName }}
+              mountPath: {{ .Values.enketo.configmountpath }}
+    
+            - name: config
+              mountPath: /config
+              
+      containers:
+        - name: enketo
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.enketo.image.registry }}/{{ .Values.enketo.image.repository }}:{{ .Values.enketo.image.tag }}"
+          imagePullPolicy: {{ .Values.enketo.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.enketo.container.port }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+          env:
+            - name: DOMAIN
+              value: {{ .Values.networking.enketo.ingress.host | quote }}
+
+            - name: SUPPORT_EMAIL
+              value: {{ .Values.app.container.env.sysAdminEmail | quote }}
+
+          volumeMounts:
+          - name: {{ .Values.enketo.configSecretName }}
+            mountPath: {{ .Values.enketo.configmountpath }}
+          
+          - name: enketo-secrets
+            mountPath: /etc/secrets
+
+      volumes:
+      - name: {{ .Values.enketo.configSecretName }}
+        emptyDir: {}
+      
+      - name: config
+        configMap:
+          name: {{ .Values.enketo.configSecretName }} 
+          defaultMode: 0777
+      
+      - name: enketo-secrets
+        secret:
+          secretName: {{ .Values.enketo.configSecretName }} 
+      

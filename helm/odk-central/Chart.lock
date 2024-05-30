@@ -1,0 +1,12 @@
+dependencies:
+- name: redis
+  repository: https://charts.bitnami.com/bitnami
+  version: 16.13.2
+- name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 11.9.13
+- name: traefik
+  repository: https://helm.traefik.io/traefik
+  version: 25.0.0
+digest: sha256:81c045c193d29f903b5d2590651f31e21ca83f755f04b2280ac69ede5a3ff9fd
+generated: "2024-05-28T14:57:45.486631+02:00"

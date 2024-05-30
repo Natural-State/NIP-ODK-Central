@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "odk-central.fullname" . }}
+  labels:
+    {{- include "odk-central.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "odk-central.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "odk-central.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+          # command: ["./wait-for-it.sh", "localhost:5432", "--", "./start-odk.sh"]
+          command: ["wait-for-it", "{{ .Values.externalDatabase.host }}:{{ .Values.externalDatabase.port }}", "--", "./start-odk.sh"]
+          # env:
+          #   - name: DOMAIN
+          #     value: {{ .Values.networking.ingress.host | quote }}
+
+          #   - name: SYSADMIN_EMAIL
+          #     value: {{ .Values.app.container.env.sysAdminEmail | quote }}
+
+          #   - name: DB_HOST
+          #     value: {{ .Values.app.container.env.dbHost | quote }}
+
+          #   - name: DB_USER
+          #     value: {{ .Values.app.container.env.dbUser | quote }}
+
+          #   - name: DB_PASSWORD
+          #     value: {{ .Values.app.container.env.dbPassword | quote }}
+
+          #   - name: DB_NAME
+          #     value: {{ .Values.app.container.env.dbName | quote }}
+
+          #   - name: DB_SSL
+          #     value: {{ .Values.app.container.env.dbSSL | quote }}
+          env:
+            - name: DOMAIN
+              value: {{ .Values.networking.ingress.host | quote }}
+            - name: SYSADMIN_EMAIL
+              value: {{ .Values.app.container.env.sysAdminEmail | quote }}
+            - name: DB_HOST
+              value: {{ .Values.externalDatabase.host | quote }}
+            - name: DB_USER
+              value: {{ .Values.externalDatabase.user | quote }}
+            - name: DB_PASSWORD
+              value: {{ .Values.externalDatabase.password | quote }}
+            - name: DB_NAME
+              value: {{ .Values.externalDatabase.name | quote }}
+            # - name: DB_SSL
+            #   value: {{ .Values.externalDatabase.ssl | quote }}
+
+          volumeMounts:
+          - name: enketo-api-key
+            mountPath: /etc/secrets/enketo-api-key
+            subPath: enketo
+          
+          - name: backend-configuration
+            mountPath: /usr/share/odk/config.json.template
+            subPath: config.json
+
+
+      volumes:
+      - name: enketo-api-key
+        secret:
+          secretName: enketo
+
+      - name: backend-configuration
+        configMap:
+          name: odk-service-config
+    

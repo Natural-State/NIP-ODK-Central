@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: odk-backend-config
+data:
+  config.json: |
+    {
+        "default": {
+            "database": {
+                "host": {{ .Values.externalDatabase.host | quote }},
+                "user": {{ .Values.externalDatabase.user | quote }},
+                "password": {{ .Values.externalDatabase.password | quote }},
+                "database": {{ .Values.externalDatabase.name | quote }}
+            },
+            "xlsform": {
+                "host": "pyxform",
+                "port": 80
+            },
+            "server": {
+                "port": 8383
+            },
+            "enketo": {
+                "url": {{ .Values.networking.enketo.ingress.host | quote }},
+                "apiKey": {{ .Values.app.container.env.enketoApiKey | quote }}
+            },
+            "env": {
+                "domain": "https://{{ .Values.networking.ingress.host }}",
+                "sysadminAccount": {{ .Values.app.container.env.sysAdminEmail | quote }}
+            }
+        }
+    }

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    odk.service: enketo
+  name: enketo
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.enketo.container.port }}
+      targetPort: {{ .Values.enketo.container.port }}
+      protocol: TCP
+  selector:
+    odk.service: enketo

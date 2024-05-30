@@ -1,0 +1,91 @@
+name: "LabelStudio: Deploy"
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "The environment to deploy to"
+        type: environment
+        default: dev
+        required: true
+
+defaults:
+  run:
+    working-directory: ".github/workflows"
+
+env:
+  TLS_CRT: "${{ secrets.TLS_CRT }}"
+  TLS_KEY: "${{ secrets.TLS_KEY }}"
+  KUBERNETES_RESOURCE_GROUP: "${{ secrets.KUBERNETES_RESOURCE_GROUP }}"
+  KUBERNETES_CLUSTER_NAME: "${{ secrets.KUBERNETES_CLUSTER_NAME }}"
+  POSTGRES_KEYVAULT: "${{ secrets.POSTGRES_KEYVAULT }}"
+  namespace: "labelstudio-namespace"
+  helm_release: "labelstudio-release"
+  tls_secret_name: "ingress-tls-labelstudio"
+  postgres_secret_name: "postgres-labelstudio"
+  PGPASSWORD: "${{ secrets.PGPASSWORD }}"
+  LABEL_STUDIO_USERNAME: "${{ secrets.LABEL_STUDIO_USERNAME }}"
+  LABEL_STUDIO_PASSWORD: "${{ secrets.LABEL_STUDIO_PASSWORD }}"
+
+jobs:
+  deployment:
+    environment:
+      name: ${{ github.event.inputs.environment }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: Azure/login@v1
+        with:
+          creds: '{"clientId":"${{ secrets.ARM_CLIENT_ID }}","clientSecret":"${{ secrets.ARM_CLIENT_SECRET }}","subscriptionId":"${{ secrets.ARM_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.ARM_TENANT_ID }}"}'
+
+      # mask the ouptuts
+      - name: Get keyvault secrets
+        id: kvsecrets
+        env:
+          ENV: ${{ inputs.environment }}
+        run: |
+          echo "::add-mask::$POSTGRES_KEYVAULT"
+          DB_HOST=$(./keyvault.sh host $POSTGRES_KEYVAULT)
+          DB_USER=$(./keyvault.sh username $POSTGRES_KEYVAULT)
+          DB_PASSWORD=$(./keyvault.sh password $POSTGRES_KEYVAULT)
+          echo "::add-mask::$DB_HOST"
+          echo "::add-mask::$DB_USER"
+          echo "::add-mask::$DB_PASSWORD"
+          echo "DB_HOST=$DB_HOST" >> "$GITHUB_OUTPUT"
+          echo "DB_USER=$DB_USER" >> "$GITHUB_OUTPUT"
+          echo "DB_PASSWORD=$DB_PASSWORD" >> "$GITHUB_OUTPUT"
+
+      - name: Azure Kubernetes set context
+        uses: Azure/aks-set-context@v3
+        with:
+          resource-group: "${{ env.KUBERNETES_RESOURCE_GROUP }}"
+          cluster-name: "${{ env.KUBERNETES_CLUSTER_NAME }}"
+
+      - name: Create namespace and secret
+        run: |
+          source ./secrets.sh -n ${{ env.namespace }} \
+            -tls ${{ env.tls_secret_name }} \
+            --tls-crt ${{ env.TLS_CRT }} \
+            --tls-key ${{ env.TLS_KEY }} \
+            --postgres_secret_name ${{ env.postgres_secret_name }} \
+            --PGPASSWORD ${{ env.PGPASSWORD }}
+
+      - name: Update helm chart and values
+        run: |
+          source ./deployment.sh
+          deploy_labelstudio \
+            ${{ env.helm_release }} \
+            ${{ secrets.DOMAIN_NAME }} \
+            ${{ env.tls_secret_name }} \
+            ${{ steps.kvsecrets.outputs.DB_HOST }} \
+            ${{ steps.kvsecrets.outputs.DB_USER }} \
+            ${{ steps.kvsecrets.outputs.DB_PASSWORD }} \
+            ${{ secrets.ARM_TENANT_ID }} \
+            ${{ env.postgres_secret_name }} \
+            ${{ env.PGPASSWORD }} \
+            ${{ env.LABEL_STUDIO_USERNAME }} \
+            ${{ env.LABEL_STUDIO_PASSWORD }}
+            
+
